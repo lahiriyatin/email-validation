@@ -8,7 +8,7 @@ import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
 import logo from '../../assets/logo.svg';
-import validator from 'email-validator'; // Assuming you're using the email-validator package
+import validator from 'email-validator'; 
 
 export default function LoginForm() {
   const [showAlert, setShowAlert] = useState(false);
@@ -31,8 +31,8 @@ export default function LoginForm() {
     const email = data.get('email');
     const password = data.get('password');
 
-    const isEmailValid = validator.validate(email); // Validate the email using email-validator package
-    const isPasswordValid = validatePassword(password); // Validate password using the validatePassword function
+    const isEmailValid = validator.validate(email); 
+    const isPasswordValid = validatePassword(password); 
 
     setEmailError(!isEmailValid);
     setPasswordError(!isPasswordValid);
@@ -57,7 +57,7 @@ export default function LoginForm() {
         email: data.get('email'),
         password: data.get('password'),
       });
-      setErrorMessage(''); // Clear the error message if successful
+      setErrorMessage(''); 
       setShowAlert('Login Successful');
     }
   };
