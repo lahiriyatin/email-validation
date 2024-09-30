@@ -8,43 +8,74 @@ import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
 import logo from '../../assets/logo.svg';
-
+import validator from 'email-validator'; // Assuming you're using the email-validator package
 
 export default function LoginForm() {
   const [showAlert, setShowAlert] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const validatePassword = (password) => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialCharacter = /[!@#$%&*]/.test(password);
+    const isValidLength = password.length >= 8;
+    return hasUpperCase && hasLowerCase && hasNumber && hasSpecialCharacter && isValidLength;
+  };
+
   const validateForm = (event) => {
-    event.preventDefault()
+    event.preventDefault();
     const data = new FormData(event.currentTarget);
     const email = data.get('email');
     const password = data.get('password');
 
-    // Add validation code here
+    const isEmailValid = validator.validate(email); // Validate the email using email-validator package
+    const isPasswordValid = validatePassword(password); // Validate password using the validatePassword function
 
-  }
+    setEmailError(!isEmailValid);
+    setPasswordError(!isPasswordValid);
+
+    if (!isEmailValid || !isPasswordValid) {
+      const errorMsg = !isEmailValid
+        ? 'Please enter a valid email address.'
+        : 'Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.';
+      setErrorMessage(errorMsg);
+      setShowAlert(true);
+      return false;
+    }
+
+    return true;
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-    validateForm(event);
-    setShowAlert("Login Successful");
+    if (validateForm(event)) {
+      const data = new FormData(event.currentTarget);
+      console.log({
+        email: data.get('email'),
+        password: data.get('password'),
+      });
+      setErrorMessage(''); // Clear the error message if successful
+      setShowAlert('Login Successful');
+    }
   };
 
   return (
     <>
-      {showAlert &&
+      {showAlert && (
         <Snackbar
-          open={showAlert}
+          open={!!showAlert}
           autoHideDuration={6000}
           onClose={() => setShowAlert(false)}
           message={showAlert}
         >
-          <Alert>{showAlert}</Alert>
+          <Alert severity={emailError || passwordError ? 'error' : 'success'}>
+            {errorMessage || showAlert}
+          </Alert>
         </Snackbar>
-      }
+      )}
       <Grid
         item
         xs={false}
@@ -69,9 +100,7 @@ export default function LoginForm() {
             alignItems: 'center',
           }}
         >
-          <Box sx={{
-            my: 2
-          }}>
+          <Box sx={{ my: 2 }}>
             <img src={logo} width="147" alt="harrison.ai" />
           </Box>
           <Typography component="h1" variant="h5">
@@ -87,6 +116,8 @@ export default function LoginForm() {
               name="email"
               autoComplete="email"
               autoFocus
+              error={emailError}
+              helperText={emailError ? 'Invalid email address.' : ''}
             />
             <TextField
               margin="normal"
@@ -97,6 +128,12 @@ export default function LoginForm() {
               type="password"
               id="password"
               autoComplete="current-password"
+              error={passwordError}
+              helperText={
+                passwordError
+                  ? 'Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.'
+                  : ''
+              }
             />
             <Button
               type="submit"
